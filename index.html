@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나를 사랑했던 X</title>
+    <style>
+        /* 1. 디자인의 뼈대 (컬러 및 폰트) */
+        :root {
+            --bg-color: #0d0e0e;
+            --card-bg: #1a1c1b;
+            --text-color: #e0e0e0;
+            --point-green: #4e6b61;
+            --point-blue: #5a7a91;
+            --point-red: #9e5353;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Pretendard', sans-serif;
+            margin: 0; padding: 0;
+            word-break: keep-all;
+            overflow-x: hidden;
+        }
+
+        /* 2. 상단 배경 및 줌 효과 */
+        .hero {
+            position: relative;
+            height: 65vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            /* 배경 이미지 (준호의 분위기에 맞는 이미지) */
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), 
+                        url('back.png');
+            background-size: cover;
+            background-position: center;
+            z-index: -2;
+            animation: slowZoom 20s infinite alternate ease-in-out;
+        }
+
+        @keyframes slowZoom {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+
+        /* 3. 빗물 효과 스타일 */
+        .rain {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .drop {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.15);
+            width: 1px;
+            height: 40px;
+            top: -50px;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(70vh); }
+        }
+
+        /* 4. 컨텐츠 스타일 (로고, 캐릭터, 일기장) */
+        .logo { width: 300px; margin-bottom: 15px; opacity: 0.8; }
+        .hero h1 { font-size: 1.8rem; color: var(--point-red); letter-spacing: 4px; margin: 0; }
+        
+        .section-label { padding: 40px 20px 10px; font-size: 0.75rem; letter-spacing: 2px; color: var(--point-blue); opacity: 0.8; }
+        
+        .main-char { padding: 0 20px; }
+        .main-char-img {
+            width: 100%; height: 350px;
+            background: #2a2a2a; border-radius: 15px;
+            object-fit: cover; margin-bottom: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .diary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px; padding: 15px 20px;
+        }
+        .diary-btn {
+            background: var(--card-bg);
+            border: 1px solid #333;
+            padding: 20px 5px; border-radius: 10px;
+            text-align: center; font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .sub-char-list { padding: 0 20px 60px; }
+        .sub-char-item {
+            display: flex; align-items: center;
+            background: rgba(255,255,255,0.03);
+            margin-bottom: 15px; padding: 15px; border-radius: 12px;
+        }
+        .sub-img {
+            width: 55px; height: 55px;
+            background: #333; border-radius: 50%;
+            margin-right: 15px; flex-shrink: 0;
+        }
+
+        /* 5. 일기장 팝업(모달) 스타일 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: #1a1c1b;
+            width: 75%; padding: 30px;
+            border-radius: 15px; text-align: center;
+            border: 1px solid var(--point-blue);
+        }
+        .close-btn {
+            margin-top: 20px; padding: 10px 20px;
+            background: #333; border: none; color: #fff; border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="rain" id="rainContainer"></div> <img src="https://github.com/hahihuuu/xx/blob/main/%EC%A0%9C%EB%AA%A9%20%EC%97%86%EC%9D%8C-2.png?raw=true" alt="Logo" class="logo"> 
+        <p style="font-size:0.8rem; opacity:0.6;">기억의 잔상 속에서 길을 잃다</p>
+    </section>
+
+<div class="section-label">MAIN CHARACTER</div>
+    <section class="main-char">
+        <div class="main-char-img" style="background-image: url('junho.png'); background-size: cover; background-position: center;"></div> 
+        
+        <div class="main-char-info">
+            <h2 style="margin:0;">서준호 <span style="font-size:0.8rem; color:#888; font-weight:normal;">30세 / 공기업 재직</span></h2>
+            <p style="color:#666; font-size:0.85rem; margin:5px 0 15px;">#다정함 #배려심 #안정형 #이성적</p>
+            <p style="font-size:0.9rem; line-height:1.6; opacity:0.8;">
+                세상 모든 기준이 유저였던 사람. 유저의 이별 선언에 끝까지 붙잡았지만 결국 놓아 주고 힘든 시간을 보냈습니다. 최근, 자신에게 다가와 준 새로운 연인과 만남을 이어오고 있습니다.
+            </p>
+        </div>
+    </section>
+
+    <div class="section-label">HIS DIARY</div>
+    <div class="diary-grid">
+        <div class="diary-btn" onclick="openDiary('연애 중', '2023년 5월 20일\n\n내 생일에 네가 직접 케이크를 만들어줬다. 서툰 솜씨로 딸기를 올리다 크림에 손가락 자국을 내고는, 시무룩한 표정으로 나를 쳐다보던 얼굴이 자꾸 생각나서 웃음이 난다. 맛은 조금 없었지만, 세상에서 가장 달콤한 케이크였다. 촛불을 불고 네 얼굴을 봤을 때, 나보다 더 행복하게 웃고 있는 너를 보면서 평생을 함께하고 싶다는 생각을 처음으로 했다.\n\n네가 내 옆에 있다는 사실만으로도 모든 순간이 완벽해진다. 오늘처럼만, 앞으로도 계속 내 옆에서 웃어주면 좋겠다. 너의 모든 순간을 내가 지켜주고 싶다. 사랑한다, 유저야.')">📔 연애 중</div>
+        <div class="diary-btn" onclick="openDiary('이별 후', '2025년 9월 2일\n\n오늘 오랜만에 혼자 부산에 다녀왔다.\n회사 출장 핑계를 댔지만, 사실은 그냥 도망치고 싶었다.\n광안리 밤바다를 보는데 옆에 네가 없다는 게 실감이 나서 한참을 그냥 서 있었다. 파도 소리가 꼭 네가 나를 부르는 것 같아서 몇 번이나 뒤를 돌아봤다. 바보 같은 짓인 거 알면서도.\n너와 함께 걸었던 그 모래사장을 혼자 걸었다. 발자국이 하나밖에 없다는 게 이렇게 슬픈 일일 줄은 몰랐다. 네가 없으니까 바다도, 야경도 아무런 의미가 없었다. 그냥 전부 회색으로 보였다.\n\n아직도 네 웃음소리가 귓가에 맴도는 것 같은데, 왜 내 옆에는 없는 걸까. 너는 정말 내가 다 잊었을까.')">📘 이별 후</div>
+        <div class="diary-btn" onclick="openDiary('새로운 시작', '2025년 11월 5일\n\n오늘 예지 씨가 또 회사 근처로 찾아왔다. 저녁이나 같이 하자면서, 부담 갖지 말라고 웃는데 그 모습이 꼭 햇살 같았다. 사실 요즘 계속 피해 다녔다. 누군가를 다시 만난다는 게, 특히 유저 이후로는 불가능할 거라고 생각했으니까. 그런데 이 사람은 자꾸만 내 닫힌 문을 두드린다. 화내지도, 재촉하지도 않고 그냥 묵묵히.\n\n밥을 먹는 내내 유저 생각이 났다. 그리고 그 사실이 눈앞의 예지 씨에게 너무 미안해서 고개를 들 수가 없었다. 내가 먼저 말했다. 아직 누군가를 만날 준비가 안 된 것 같다고, 당신에게 상처만 줄 거라고. 예지 씨는 그냥 가만히 듣고만 있었다. 그리고는 괜찮다고 했다. 기다리는 건 자기가 할 테니, 오빠는 그냥 편하게 있으라고. 그 말을 듣는데, 얼어붙었던 마음 한구석이 조금 녹는 기분이었다. 처음으로, 다시 시작할 수도 있겠다는 아주 작은 희망이 보였다.')">📗 새로운 시작</div>
+    </div>
+
+    <div class="section-label">OTHERS</div>
+    <section class="sub-char-list">
+        <div class="sub-char-item">
+            <div class="sub-img" style="background-image: url('yeji.jpg'); background-size: cover; background-position: center;"></div> 
+ <div class="sub-info">
+                <h4 style="margin:0; color:var(--point-green);">나예지 (29, 여)</h4>
+                <p style="margin:5px 0 0; font-size:0.8rem; opacity:0.6;">서준호의 현 여자친구. 서준호와 유저의 연애 이야기를 일부 알고 있으며, 그를 진심으로 아낍니다.</p>
+            </div>
+        </div>
+        <div class="sub-char-item">
+            <div class="sub-img" style="background-image: url('지성.jpg'); background-size: cover; background-position: center;"></div> <div class="sub-info">
+                <h4 style="margin:0; color:var(--point-blue);">한지성 (30, 남)</h4>
+                <p style="margin:5px 0 0; font-size:0.8rem; opacity:0.6;">서준호의 친구이자 유저의 친구. 둘의 이별 후 의식적으로 서로의 이야기를 하지 않으려고 노력합니다.</p>
+            </div>
+        </div>
+    </section>
+
+    <div id="diaryModal" class="modal" onclick="closeDiary()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h3 id="modalTitle" style="margin-top:0; font-size:0.9rem; color:var(--point-blue);"></h3>
+            <p id="modalText" style="font-size:0.95rem; line-height:1.7; color:#ddd;"></p>
+            <button class="close-btn" onclick="closeDiary()">닫기</button>
+        </div>
+    </div>
+
+    <script>
+        // 1. 빗물 만들기
+        function createRain() {
+            const container = document.getElementById('rainContainer');
+            for (let i = 0; i < 40; i++) {
+                const drop = document.createElement('div');
+                drop.className = 'drop';
+                drop.style.left = Math.random() * 100 + '%';
+                drop.style.animationDuration = (Math.random() * 0.4 + 0.6) + 's';
+                drop.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(drop);
+            }
+        }
+
+        // 2. 일기장 열고 닫기
+        function openDiary(title, text) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalText').innerText = text;
+            document.getElementById('diaryModal').style.display = 'flex';
+        }
+        function closeDiary() {
+            document.getElementById('diaryModal').style.display = 'none';
+        }
+
+        // 시작하자마자 비 내리게 하기
+        createRain();
+    </script>
+</body>
+</html>
